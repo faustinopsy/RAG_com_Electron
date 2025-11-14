@@ -23,14 +23,14 @@ export async function initializeRAG() {
         console.log(`Conectado ao LanceDB em: ${dbPath}`);
 
         // 2. Definir o schema (384 dimensões para este modelo)
-        const schema = [
-            { name: 'vector', type: 'float32', dimension: 384 },
-            { name: 'text', type: 'string' }
-        ];
+        const sampleData = [{
+            vector: Array(384).fill(0), // Um array de 384 números (float32)
+            text: "amostra"                 // Um texto (string)
+        }];
 
         // 3. Tentar criar a tabela 'documentos'
         try {
-            await db.createTable('documentos', schema);
+            await db.createTable('documentos', sampleData);
             console.log('Tabela "documentos" criada com sucesso.');
         } catch (e) {
             console.log('Tabela "documentos" já existe. Abrindo...');
@@ -64,10 +64,10 @@ export async function ingestPDF(filePath) {
     console.log(`Iniciando ingestão do arquivo: ${filePath}`);
     
     try {
-        // 1. Ler o arquivo PDF
         const dataBuffer = await fs.readFile(filePath);
-        const pdfData = await PDFParse(dataBuffer);
-        const text = pdfData.text;
+        const pdfParser = new PDFParse({ data: dataBuffer });
+        const pdfResult = await pdfParser.getText();
+        const text = pdfResult.text;
         console.log(`PDF lido, ${text.length} caracteres.`);
 
         // 2. Quebrar o texto em pedaços ("chunks")

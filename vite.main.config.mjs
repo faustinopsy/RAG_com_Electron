@@ -1,13 +1,21 @@
+// vite.main.config.js
 import { defineConfig } from 'vite';
 
- defineConfig({
+export default defineConfig({
+  
   build: {
     rollupOptions: {
       external: [
-        '@xenova/transformers',
-        '@lancedb/lancedb'
+        '@lancedb/lancedb', 
+        '@langchain/textsplitters',
+        'onnxruntime-node',
+        'sharp',
+        'pdf-parse' 
       ]
     }
+  },
+  
+  commonjsOptions: {
+    ignoreDynamicRequires: true // MANTENHA ISTO AQUI
   }
 });
-export default defineConfig;

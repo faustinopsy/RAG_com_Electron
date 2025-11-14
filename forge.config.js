@@ -26,6 +26,10 @@ module.exports = {
   ],
   plugins: [
     {
+      name: '@electron-forge/plugin-auto-unpack-natives',
+      config: {},
+    },
+    {
       name: '@electron-forge/plugin-vite',
       config: {
         // `build` can specify multiple entry builds, which can be Main process, Preload scripts, Worker process, etc.

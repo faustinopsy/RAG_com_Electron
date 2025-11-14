@@ -1,63 +1,54 @@
-import { app, BrowserWindow, ipcMain, nativeTheme  } from 'electron';
+import { app, BrowserWindow, ipcMain, nativeTheme, dialog } from 'electron';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import started from 'electron-squirrel-startup';
-import { initializeRAG, ingestPDF } from './ragManager.js';
-// Handle creating/removing shortcuts on Windows when installing/uninstalling.
+
+import { initializeRAG, ingestPDF } from './ragManager'; 
+
+// const __filename = fileURLToPath(import.meta.url);
+// const __dirname = path.dirname(__filename);
+// ----------------------------------------------
+
 if (started) {
   app.quit();
 }
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+
 const createWindow = () => {
-  // Create the browser window.
   const mainWindow = new BrowserWindow({
     width: 1200,
     height: 600,
     transparent: false,
-    alwaysOnTop: true,
+    alwaysOnTop: false,
     resizable: true,
     fullscreen: false,
     frame: true,
     webPreferences: {
-      preload: path.join(__dirname,'./src/preload.js'),
+      preload: path.join(__dirname, 'preload.js'), 
       nodeIntegration: false,
       contextIsolation: true,
     },
   });
 
-  // and load the index.html of the app.
-  
-  mainWindow.loadFile(path.join(__dirname,`../index.html`));
-  
+  if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
+    mainWindow.loadURL(MAIN_WINDOW_VITE_DEV_SERVER_URL);
+  } else {
+    mainWindow.loadFile(path.join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/index.html`));
+  }
 
-  // Open the DevTools.
   //mainWindow.webContents.openDevTools();
-  
 };
 
-app.whenReady().then(async() => {
-  await initializeRAG();
-  createWindow();
+app.whenReady().then(async () => { // <-- Tornar async
   
+  await initializeRAG();
+  
+  createWindow();
+
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
       createWindow();
     }
   });
-
-ipcMain.handle('rag:ingestPDF', async (event, filePath) => {
-  console.log(`Recebido pedido de ingestão para: ${filePath}`);
-
-  // Validação básica
-  if (!filePath || typeof filePath !== 'string') {
-    return { success: false, message: 'Caminho do arquivo inválido.' };
-  }
-
-  // Chama a função do nosso "cérebro"
-  const result = await ingestPDF(filePath);
-  return result;
-});
 
   ipcMain.handle('dark-mode:toggle', () => {
     if (nativeTheme.shouldUseDarkColors) {
@@ -76,6 +67,25 @@ ipcMain.handle('rag:ingestPDF', async (event, filePath) => {
     return app.getVersion(); 
   });
 
+  ipcMain.handle('dialog:openFile', async () => {
+    const { canceled, filePaths } = await dialog.showOpenDialog({
+      properties: ['openFile'],
+      filters: [{ name: 'Documentos PDF', extensions: ['pdf'] }]
+    });
+    if (!canceled) {
+      return filePaths[0];
+    }
+    return null;
+  });
+
+  ipcMain.handle('rag:ingestPDF', async (event, filePath) => {
+    console.log(`[Main] Recebido pedido de ingestão para: ${filePath}`);
+    if (!filePath || typeof filePath !== 'string') {
+      return { success: false, message: 'Caminho do arquivo inválido.' };
+    }
+    const result = await ingestPDF(filePath); 
+    return result;
+  });
 });
 
 app.on('window-all-closed', () => {
