@@ -3,7 +3,9 @@ const { FuseV1Options, FuseVersion } = require('@electron/fuses');
 
 module.exports = {
   packagerConfig: {
-    asar: true,
+    asar: {
+      unpack: "public/models/**"
+    }
   },
   rebuildConfig: {},
   makers: [
@@ -68,3 +70,5 @@ module.exports = {
     }),
   ],
 };
+
+

@@ -6,13 +6,24 @@
 
   </head>
   <body>
-    <div id="admin-area">
-      <h2>Área Administrativa</h2>
-      
-      <button id="upload-pdf-button">Ensaiar (Upload PDF)</button>
-      
-      <p id="upload-status"></p>
+<button id="open-3d-view">Ver Espaço Vetorial 3D</button>
+<button id="upload-pdf-button">+</button>
+<p id="upload-status" hidden></p>
+<div class="app-container">
+  
+  <div id="chat-area">
+    <h2>Área do Usuário (Chat)</h2>
+    
+    <div id="chat-messages">
+      </div>
+    
+    <div id="chat-input-bar">
+      <input type="text" id="chat-input" placeholder="Pergunte algo sobre os seus PDFs...">
+      <button id="chat-send-button">Enviar</button>
     </div>
+  </div>
+
+  </div>
     <script type="module" src="/src/renderer.js"></script>
   </body>
 </html>
