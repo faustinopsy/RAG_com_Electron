@@ -117,19 +117,20 @@ app.whenReady().then(async () => { // <-- Tornar async
     return result;
   });
 
-  ipcMain.handle('get-vector-data', () => {
-  // Retorna instantaneamente os dados da cache (que estão em background)
-  const data = getCachedPlotData();
-  if (data === null) {
-    // Se o cálculo ainda não terminou, pede para esperar
-    throw new Error('Os dados 3D ainda estão a ser calculados. Tente novamente daqui a um momento.');
-  }
-  return data;
-});
+ipcMain.handle('get-vector-data', () => {
+   // Retorna instantaneamente os dados da cache (que estão em background)
+   const data = getCachedPlotData();
+   if (data === null) {
+     // Se o cálculo ainda não terminou, pede para esperar
+     throw new Error('Os dados 3D ainda estão a ser calculados. Tente novamente daqui a um momento.');
+   }
+   return data;
+ });
 
+// --- ESTE É O HANDLER LENTO (COMENTE OU APAGUE-O) ---
 // ipcMain.handle('get-vector-data', async () => {
-//     return await getAllVectors3D();
-//   });
+//   return await getAllVectors3D();
+// });
   // Handler para ABRIR a nova janela
   ipcMain.handle('open-vector-window', () => {
     createVectorWindow();

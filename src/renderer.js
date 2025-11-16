@@ -80,7 +80,7 @@ document.addEventListener('DOMContentLoaded', async() => {
   const open3DButton = document.getElementById('open-3d-view');
   if (open3DButton) {
     open3DButton.addEventListener('click', () => {
-      // Chama a função do preload
+      window.api.getVectorData();
       window.api.openVectorWindow();
     });
   }
