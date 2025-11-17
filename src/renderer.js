@@ -3,18 +3,15 @@ document.addEventListener('DOMContentLoaded', async() => {
 
   const uploadButton = document.getElementById('upload-pdf-button');
   const uploadStatus = document.getElementById('upload-status');
-
   if (uploadButton && uploadStatus) {
     uploadButton.addEventListener('click', async () => {
-      uploadStatus.textContent = 'Abrindo caixa de diálogo...';
+    uploadStatus.textContent = 'Abrindo caixa de diálogo...';
 
       try {
         const filePath = await window.api.openFile();
-
         if (filePath) {
           uploadStatus.textContent = `Processando arquivo: ${filePath}`;
           const result = await window.api.ingestPDF(filePath);
-
           if (result.success) {
             uploadStatus.textContent = `Sucesso! ${result.message}`;
           } else {

@@ -2,11 +2,7 @@ import { app, BrowserWindow, ipcMain, nativeTheme, dialog } from 'electron';
 import path from 'node:path';
 import started from 'electron-squirrel-startup';
 
-import { initializeRAG, ingestPDF, askRAG, getAllVectors3D, getCachedPlotData } from './ragManager'; 
-
-// const __filename = fileURLToPath(import.meta.url);
-// const __dirname = path.dirname(__filename);
-// ----------------------------------------------
+import { initializeRAG, ingestPDF, askRAG, getCachedPlotData } from './ragManager'; 
 
 if (started) {
   app.quit();
@@ -43,20 +39,18 @@ function createVectorWindow() {
     height: 600,
     title: 'Visualizador de Vetores 3D',
     webPreferences: {
-      preload: path.join(__dirname, 'preload.js') // Reutiliza o mesmo preload
+      preload: path.join(__dirname, 'preload.js') 
     }
   });
 
-  // Carrega um NOVO ficheiro HTML que vamos criar
   if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
-    // Aponta para um novo 'entry point' do Vite
     vectorWindow.loadURL(`${MAIN_WINDOW_VITE_DEV_SERVER_URL}/vector.html`);
   } else {
     vectorWindow.loadFile(path.join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/vector.html`));
   }
 }
 
-app.whenReady().then(async () => { // <-- Tornar async
+app.whenReady().then(async () => { 
   
   await initializeRAG();
   
@@ -103,7 +97,6 @@ app.whenReady().then(async () => { // <-- Tornar async
       return 'Pergunta inválida.';
     }
 
-    // Chama a função "pensar" do nosso cérebro
     const answer = await askRAG(question);
     return answer;
   });
@@ -118,10 +111,8 @@ app.whenReady().then(async () => { // <-- Tornar async
   });
 
 ipcMain.handle('get-vector-data', () => {
-   // Retorna instantaneamente os dados da cache (que estão em background)
    const data = getCachedPlotData();
    if (data === null) {
-     // Se o cálculo ainda não terminou, pede para esperar
      throw new Error('Os dados 3D ainda estão a ser calculados. Tente novamente daqui a um momento.');
    }
    return data;
@@ -135,7 +126,6 @@ ipcMain.handle('get-vector-data', () => {
   ipcMain.handle('open-vector-window', () => {
     createVectorWindow();
   });
-
 });
 
 app.on('window-all-closed', () => {

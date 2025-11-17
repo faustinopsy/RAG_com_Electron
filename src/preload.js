@@ -16,7 +16,6 @@ contextBridge.exposeInMainWorld('api', {
   getVectorData: () => {
       return ipcRenderer.invoke('get-vector-data');
     },
-    // Para a janela PRINCIPAL pedir para abrir a janela 3D
     openVectorWindow: () => {
       return ipcRenderer.invoke('open-vector-window');
     }

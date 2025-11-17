@@ -1,13 +1,8 @@
-// src/main/pcaService.js
-
 import PCA from 'pca-js';
 
-// A nossa cache 3D vive agora neste ficheiro
 let cachedPlotData = null;
 
-/**
- * Retorna os dados 3D pré-calculados da cache.
- */
+
 export function getCachedPlotData() {
   return cachedPlotData;
 }
@@ -18,12 +13,11 @@ export function getCachedPlotData() {
  */
 export async function calculateAndCachePCA(db) {
   try {
-    // 'db' é passado como parâmetro
     if (!db) {
         console.warn('[PCA] A base de dados não está pronta, a saltar o cálculo.');
         return;
     }
-    const plotData = await getAllVectors3D(db); // Chama a função abaixo
+    const plotData = await getAllVectors3D(db);
     cachedPlotData = plotData;
     console.log(`[PCA] Dados 3D pré-calculados e guardados em cache.`);
   } catch (error) {
@@ -42,27 +36,15 @@ async function getAllVectors3D(db) {
   console.log('[PCA] A carregar todos os vetores da base de dados...');
   
   const table = await db.openTable('documentos');
-  const allData = await table.query().toArray();
+  const allData = await table.query().limit(50).toArray();
 
-  // --- A CORREÇÃO "Float32Array" ---
-  // Este é o filtro que corrige o seu bug
-  const validData = allData.filter(d => 
-      d.vector && 
-      // Verifique se é um Array OU um Float32Array
-      (Array.isArray(d.vector) || d.vector instanceof Float32Array) && 
-      d.vector.length === 384 &&
-      // Garante que não há 'nulls' lá dentro
-      d.vector.every(val => typeof val === 'number') 
-  );
-  // --- FIM DA CORREÇÃO ---
+  const validData = allData
 
   if (validData.length === 0) {
-    // O seu log de erro atual vem daqui
     console.log('[PCA] Nenhum vetor válido encontrado.'); 
     return { x: [], y: [], z: [], text: [] };
   }
 
-  // Separar os dados limpos
   const vectors = validData.map(d => d.vector); // N x 384 dimensões
   const labels = validData.map(d => d.text);    // N x textos
 

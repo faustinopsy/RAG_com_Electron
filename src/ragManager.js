@@ -5,16 +5,11 @@ import fs from 'fs/promises';
 import path from 'node:path'; 
 import { app } from 'electron';
 
-// --- CORREÇÃO 2: A importação correta do PDF-Parse (CJS) ---
-// 1. Importar a ferramenta 'createRequire'
 import { createRequire } from 'node:module';
-// 2. Criar uma função 'require' local
 const require = createRequire(import.meta.url);
-// 3. Usar o 'require' para carregar a classe
 const PDFParse = require('pdf-parse');
 // ---------------------------------------------------------
 
-// (PCA foi movido para o seu próprio ficheiro, por isso o import dele está correto)
 import { calculateAndCachePCA, getCachedPlotData } from './pcaService.js';
 
 
@@ -28,7 +23,6 @@ let db;
 let embedder;
 let generator;
 
-// Exporta a função da cache para o index.js
 export { getCachedPlotData };
 
 
@@ -62,7 +56,6 @@ export async function initializeRAG() {
 
     console.log('✅ Cérebro RAG inicializado e pronto para uso!');
     
-    // Inicia o cálculo do PCA em background
     calculateAndCachePCA(db);
 
   } catch (error) {
@@ -84,7 +77,6 @@ export async function ingestPDF(filePath) {
   try {
     const dataBuffer = await fs.readFile(filePath);
     
-    // (A sua lógica de 'new PDFParse' agora funciona por causa da CORREÇÃO 2)
     const pdfParser = new PDFParse({ data: dataBuffer });
     const pdfResult = await pdfParser.getText();
     const text = pdfResult.text;
@@ -110,7 +102,6 @@ export async function ingestPDF(filePath) {
     }
     console.log('Ingestão concluída com sucesso!');
     
-    // Recalcula o PCA em background
     console.log('[PCA] Novo PDF ingerido, a recalcular os dados 3D em background...');
     calculateAndCachePCA(db); 
 
@@ -144,29 +135,17 @@ export async function askRAG(question) {
     const context = resultsArray.map(r => r.text).join('\n---\n');
     console.log(`Contexto encontrado: ${context.substring(0, 100)}...`);
 
-    // --- CORREÇÃO 3: O Prompt Simples (Anti-Alucinação) ---
+    // --- O Prompt Simples (Anti-Alucinação) ---
     // Este formato de "Preenchimento de Lacunas" funciona
     // muito melhor com modelos pequenos.
-    const finalPrompt = `
-Contexto:
-${context}
----
-Pergunta:
-${question}
----
-Resposta:
+    const finalPrompt = `Contexto:${context}---Pergunta:${question}---Resposta:
 `;
-    // --- FIM DA CORREÇÃO 3 ---
 
-    // 5. Gerar a Resposta
-    // Não precisamos de 'messages' ou 'apply_chat_template'
-    // para este prompt simples.
     const output = await generator(finalPrompt, {
       max_new_tokens: 300,
       temperature: 0.1,
     });
 
-    // Limpa a resposta (removendo o prompt que demos)
     const rawAnswer = output[0].generated_text;
     const answer = rawAnswer.substring(finalPrompt.length).trim();
     
