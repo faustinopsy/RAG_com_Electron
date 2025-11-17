@@ -36,9 +36,15 @@ async function getAllVectors3D(db) {
   console.log('[PCA] A carregar todos os vetores da base de dados...');
   
   const table = await db.openTable('documentos');
-  const allData = await table.query().limit(50).toArray();
+  const allData = await table.query().toArray();
 
-  const validData = allData
+  const validData = allData.filter(d => {
+    const isFloat32Array = Object.prototype.toString.call(d.vector) === '[object Float32Array]';
+    return d.vector && 
+      (Array.isArray(d.vector) || isFloat32Array) && 
+      d.vector.length === 384 &&
+      d.vector.every(val => typeof val === 'number' && !isNaN(val)) 
+  });
 
   if (validData.length === 0) {
     console.log('[PCA] Nenhum vetor válido encontrado.'); 
